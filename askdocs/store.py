@@ -36,6 +36,10 @@ class VectorStore(ABC):
     def get_all(self) -> list[tuple[str, dict]]:
         """Return (id, payload) for every stored chunk."""
 
+    @abstractmethod
+    def search(self, vector: list[float], limit: int) -> list[tuple[dict, float]]:
+        """Return (payload, similarity score) for the most similar chunks."""
+
 
 class QdrantStore(VectorStore):
     def __init__(self, url: str, collection: str, dimension: int):
@@ -98,3 +102,9 @@ class QdrantStore(VectorStore):
             points.extend((str(p.id), p.payload) for p in batch)
             if offset is None:
                 return points
+
+    def search(self, vector: list[float], limit: int) -> list[tuple[dict, float]]:
+        hits = self._client.query_points(
+            self._collection, query=vector, limit=limit, with_payload=True
+        ).points
+        return [(hit.payload, hit.score) for hit in hits]
