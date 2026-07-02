@@ -17,6 +17,24 @@ from askdocs.sources import DocSource
 from askdocs.store import VectorStore, content_hash
 
 DEFAULT_INTERVAL = 5.0
+QDRANT_WAIT_TIMEOUT = 60.0
+
+
+def _wait_for_qdrant(url: str, timeout: float = QDRANT_WAIT_TIMEOUT) -> None:
+    """Block until qdrant answers — `docker compose up` starts both together."""
+    from qdrant_client import QdrantClient
+
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            client = QdrantClient(url=url, timeout=5)
+            client.get_collections()
+            client.close()
+            return
+        except Exception:
+            if time.monotonic() > deadline:
+                raise
+            time.sleep(1)
 
 
 @dataclass
@@ -96,9 +114,11 @@ def main(argv: list[str] | None = None) -> int:
     from askdocs.sources import LocalMarkdownSource
     from askdocs.store import QdrantStore
 
+    qdrant_url = os.environ.get("QDRANT_URL", "http://localhost:6333")
+    _wait_for_qdrant(qdrant_url)
     embedder = SentenceTransformersProvider()
     store = QdrantStore(
-        url=os.environ.get("QDRANT_URL", "http://localhost:6333"),
+        url=qdrant_url,
         collection=os.environ.get("ASKDOCS_COLLECTION", DEFAULT_COLLECTION),
         dimension=embedder.dimension,
     )
