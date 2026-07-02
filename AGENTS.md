@@ -30,6 +30,12 @@ askdocs — локальний RAG-інструмент «чат з докуме
 
 ## Робочий процес (OpenSpec)
 
+Передумова: встанови OpenSpec CLI (`brew install openspec` або
+`npm install -g openspec`) і згенеруй воркфлоу під свій AI-тул:
+`openspec init --tools <claude|cursor|codex|…>`. Це створює slash-команди/скіли
+в `.claude/` (чи теці твого тула) — вони згенеровані й не комітяться. Самі
+специфікації (`openspec/specs`, `openspec/changes`) — у репозиторії.
+
 Кожен capability проводиться окремим OpenSpec change через цикл:
 
 ```
