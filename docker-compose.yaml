@@ -3,6 +3,10 @@ services:
     build: .
     environment:
       QDRANT_URL: http://qdrant:6333
+      LLM_BASE_URL: http://host.docker.internal:1234/v1
+      LLM_MODEL: ${LLM_MODEL:-google/gemma-4-e4b}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - .:/app
     depends_on:
