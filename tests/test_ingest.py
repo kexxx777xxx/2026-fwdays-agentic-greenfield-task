@@ -20,12 +20,14 @@ def test_ingest_fixture_corpus_stores_chunks_with_metadata(clean_store, embedder
 
     payloads = [p for _, p in clean_store.get_all()]
     sources = {p["source_path"] for p in payloads}
-    assert sources == {
+    # subset check so the corpus can grow (eval) without breaking this test
+    assert {
         "README.md",
         "bezpeka.md",
         "dvyhun/palyvo.md",
         "dvyhun/kalibruvannya.md",
-    }  # non-.md files are ignored
+    } <= sources
+    assert "notatky.txt" not in sources  # non-.md files are ignored
     for payload in payloads:
         assert isinstance(payload["chunk_index"], int)
         assert payload["heading"]  # heading trail present

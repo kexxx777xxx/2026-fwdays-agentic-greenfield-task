@@ -5,30 +5,20 @@ Skips automatically when the LLM endpoint is unreachable, so the suite stays
 green on machines without LM Studio.
 """
 
-import os
 from pathlib import Path
 
-import httpx
 import pytest
+from conftest import llm_available
 
 from askdocs.answer import answer_question
 from askdocs.ingest import ingest
-from askdocs.llm import DEFAULT_BASE_URL, OpenAICompatibleProvider
+from askdocs.llm import OpenAICompatibleProvider
 from askdocs.retriever import VectorRetriever
 from askdocs.sources import LocalMarkdownSource
 
 CORPUS_DIR = Path(__file__).parent / "corpus"
 
-
-def _llm_available() -> bool:
-    base_url = os.environ.get("LLM_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
-    try:
-        return httpx.get(f"{base_url}/models", timeout=3).status_code == 200
-    except httpx.HTTPError:
-        return False
-
-
-pytestmark = pytest.mark.skipif(not _llm_available(), reason="LLM endpoint unreachable")
+pytestmark = pytest.mark.skipif(not llm_available(), reason="LLM endpoint unreachable")
 
 
 @pytest.fixture

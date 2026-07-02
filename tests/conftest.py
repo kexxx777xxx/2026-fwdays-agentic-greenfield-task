@@ -1,10 +1,22 @@
 import os
 import time
 
+import httpx
 import pytest
 
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
 TEST_COLLECTION = "askdocs_test"
+
+
+def llm_available() -> bool:
+    """True when the configured LLM endpoint answers — used to skip live tests."""
+    from askdocs.llm import DEFAULT_BASE_URL
+
+    base_url = os.environ.get("LLM_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
+    try:
+        return httpx.get(f"{base_url}/models", timeout=3).status_code == 200
+    except httpx.HTTPError:
+        return False
 
 
 @pytest.fixture(scope="session")
