@@ -38,7 +38,7 @@ askdocs — локальний RAG-інструмент «чат з докуме
 
 Кожен capability проводиться окремим OpenSpec change через цикл:
 
-```
+```text
 /opsx:propose <name>   # proposal.md + design.md + specs + tasks.md
 /opsx:apply <name>     # реалізація по tasks, зелені тести
 /opsx:sync <name>      # delta spec -> openspec/specs/<capability>/spec.md
@@ -50,7 +50,7 @@ askdocs — локальний RAG-інструмент «чат з докуме
 
 ## Структура коду
 
-```
+```text
 askdocs/
   sources.py     # DocSource + LocalMarkdownSource
   chunking.py    # structure-aware розбиття markdown (блоки не ріжуться)
