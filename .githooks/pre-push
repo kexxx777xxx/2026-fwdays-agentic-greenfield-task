@@ -5,8 +5,9 @@
 set -euo pipefail
 
 echo "pre-push ▸ markdownlint (підтримувані доки)…"
+# Шаблон PR — файл курсу (стартер), не форматуємо його під наш лінтер.
 npx --yes markdownlint-cli2@0.23.0 \
-  "*.md" "docs/**/*.md" ".github/**/*.md"
+  "*.md" "docs/**/*.md" ".github/**/*.md" "!.github/pull_request_template.md"
 
 echo "pre-push ▸ pytest у контейнері…"
 docker compose run --rm app pytest -q
