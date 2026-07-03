@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # OpenSpec artifacts under openspec/** follow their own format and are
+      # validated by `openspec validate`; markdownlint covers the hand-authored
+      # docs. Pinned to the version verified locally so CI matches the gate.
+      - name: Lint maintained markdown docs
+        run: >
+          npx --yes markdownlint-cli2@0.23.0
+          "README.md" "AGENTS.md" "CLAUDE.md" "docs/**/*.md" ".github/**/*.md"
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build app image
+        run: docker compose build
+      # qdrant starts via compose dependency; live-LLM tests auto-skip with no
+      # LM Studio endpoint, so the suite stays green in CI.
+      - name: Run test suite
+        run: docker compose run --rm app pytest -q

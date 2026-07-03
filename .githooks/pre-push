@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Локальний рев'ю-гейт: те саме, що CI, але до push'у.
+# Увімкнути один раз:  git config core.hooksPath .githooks
+# Обійти для WIP:       git push --no-verify
+set -euo pipefail
+
+echo "pre-push ▸ markdownlint (підтримувані доки)…"
+npx --yes markdownlint-cli2@0.23.0 \
+  "README.md" "AGENTS.md" "CLAUDE.md" "docs/**/*.md" ".github/**/*.md"
+
+echo "pre-push ▸ pytest у контейнері…"
+docker compose run --rm app pytest -q
+
+echo "pre-push ▸ OK — можна пушити."
