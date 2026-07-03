@@ -6,7 +6,7 @@ set -euo pipefail
 
 echo "pre-push ▸ markdownlint (підтримувані доки)…"
 npx --yes markdownlint-cli2@0.23.0 \
-  "README.md" "AGENTS.md" "CLAUDE.md" "docs/**/*.md" ".github/**/*.md"
+  "*.md" "docs/**/*.md" ".github/**/*.md"
 
 echo "pre-push ▸ pytest у контейнері…"
 docker compose run --rm app pytest -q
