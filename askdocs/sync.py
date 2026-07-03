@@ -6,6 +6,7 @@ the host->container boundary, so a poll loop is the robust choice.
     docker compose run --rm app python -m askdocs.sync <corpus-dir>
 """
 
+import math
 import os
 import sys
 import time
@@ -96,8 +97,10 @@ def _parse_interval(raw: str | None) -> float:
     except ValueError:
         print(f"sync: некоректний ASKDOCS_SYNC_INTERVAL={raw!r}, беру {DEFAULT_INTERVAL}s", flush=True)
         return DEFAULT_INTERVAL
-    if interval <= 0:
-        print(f"sync: ASKDOCS_SYNC_INTERVAL={interval} має бути > 0, беру {DEFAULT_INTERVAL}s", flush=True)
+    # reject inf/nan too: nan <= 0 is False and inf > 0 is True, so a bare
+    # `<= 0` check would let them through and make time.sleep() hang forever.
+    if not math.isfinite(interval) or interval <= 0:
+        print(f"sync: ASKDOCS_SYNC_INTERVAL={raw!r} має бути додатнім числом, беру {DEFAULT_INTERVAL}s", flush=True)
         return DEFAULT_INTERVAL
     return interval
 

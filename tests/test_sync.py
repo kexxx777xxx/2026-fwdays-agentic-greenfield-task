@@ -97,4 +97,6 @@ def test_parse_interval_handles_bad_input():
     assert _parse_interval("not-a-number") == DEFAULT_INTERVAL
     assert _parse_interval("0") == DEFAULT_INTERVAL
     assert _parse_interval("-3") == DEFAULT_INTERVAL
+    assert _parse_interval("inf") == DEFAULT_INTERVAL  # would make time.sleep hang
+    assert _parse_interval("nan") == DEFAULT_INTERVAL
     assert _parse_interval("2.5") == 2.5
