@@ -26,15 +26,18 @@ def _wait_for_qdrant(url: str, timeout: float = QDRANT_WAIT_TIMEOUT) -> None:
 
     deadline = time.monotonic() + timeout
     while True:
+        client = None
         try:
             client = QdrantClient(url=url, timeout=5)
             client.get_collections()
-            client.close()
             return
         except Exception:
             if time.monotonic() > deadline:
                 raise
             time.sleep(1)
+        finally:
+            if client is not None:
+                client.close()
 
 
 @dataclass
@@ -83,6 +86,22 @@ def sync_once(source: DocSource, embedder: EmbeddingProvider, store: VectorStore
     return summary
 
 
+def _parse_interval(raw: str | None) -> float:
+    """Parse ASKDOCS_SYNC_INTERVAL, falling back to the default on bad input
+    instead of crashing the watcher at startup."""
+    if not raw:
+        return DEFAULT_INTERVAL
+    try:
+        interval = float(raw)
+    except ValueError:
+        print(f"sync: некоректний ASKDOCS_SYNC_INTERVAL={raw!r}, беру {DEFAULT_INTERVAL}s", flush=True)
+        return DEFAULT_INTERVAL
+    if interval <= 0:
+        print(f"sync: ASKDOCS_SYNC_INTERVAL={interval} має бути > 0, беру {DEFAULT_INTERVAL}s", flush=True)
+        return DEFAULT_INTERVAL
+    return interval
+
+
 def watch(
     source: DocSource,
     embedder: EmbeddingProvider,
@@ -90,15 +109,21 @@ def watch(
     interval: float = DEFAULT_INTERVAL,
     max_iterations: int | None = None,
 ) -> None:
-    """Reconcile on a timer. max_iterations bounds the loop for tests."""
+    """Reconcile on a timer. max_iterations bounds the loop for tests.
+
+    A single failed pass (e.g. a transient vector-store blip) must not kill the
+    watcher — it is logged and the loop continues, so sync stays continuous."""
     iteration = 0
     while max_iterations is None or iteration < max_iterations:
-        summary = sync_once(source, embedder, store)
-        if summary.changed:
-            print(
-                f"sync: +{len(summary.added)} ~{len(summary.updated)} -{len(summary.deleted)}",
-                flush=True,
-            )
+        try:
+            summary = sync_once(source, embedder, store)
+            if summary.changed:
+                print(
+                    f"sync: +{len(summary.added)} ~{len(summary.updated)} -{len(summary.deleted)}",
+                    flush=True,
+                )
+        except Exception as e:  # noqa: BLE001 — keep the watcher alive across transient failures
+            print(f"sync: пропуск проходу через помилку, повтор за {interval}s: {e}", flush=True)
         iteration += 1
         if max_iterations is not None and iteration >= max_iterations:
             break
@@ -122,7 +147,7 @@ def main(argv: list[str] | None = None) -> int:
         collection=os.environ.get("ASKDOCS_COLLECTION", DEFAULT_COLLECTION),
         dimension=embedder.dimension,
     )
-    interval = float(os.environ.get("ASKDOCS_SYNC_INTERVAL", DEFAULT_INTERVAL))
+    interval = _parse_interval(os.environ.get("ASKDOCS_SYNC_INTERVAL"))
     print(f"askdocs sync: watching {corpus} every {interval}s", flush=True)
     watch(LocalMarkdownSource(corpus), embedder, store, interval=interval)
     return 0

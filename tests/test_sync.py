@@ -1,6 +1,7 @@
 """Reconciliation tests for sync against real qdrant."""
 
-from askdocs.sync import sync_once, watch
+import askdocs.sync as sync_mod
+from askdocs.sync import DEFAULT_INTERVAL, SyncSummary, _parse_interval, sync_once, watch
 from askdocs.sources import LocalMarkdownSource
 
 
@@ -70,3 +71,30 @@ def test_watch_runs_exactly_one_pass(clean_store, embedder, tmp_path):
 
 def _store_snapshot(store):
     return {pid: payload["content_hash"] for pid, payload in store.get_all()}
+
+
+def test_watch_survives_a_failing_pass(monkeypatch):
+    """A transient sync_once failure must not kill the watcher — no qdrant needed."""
+    calls = []
+
+    def flaky(*_args, **_kwargs):
+        calls.append(1)
+        if len(calls) == 1:
+            raise RuntimeError("qdrant blip")
+        return SyncSummary()
+
+    monkeypatch.setattr(sync_mod, "sync_once", flaky)
+
+    # First pass raises (caught, logged), second pass runs — watch must not propagate.
+    watch(source=None, embedder=None, store=None, interval=0, max_iterations=2)
+
+    assert len(calls) == 2
+
+
+def test_parse_interval_handles_bad_input():
+    assert _parse_interval(None) == DEFAULT_INTERVAL
+    assert _parse_interval("") == DEFAULT_INTERVAL
+    assert _parse_interval("not-a-number") == DEFAULT_INTERVAL
+    assert _parse_interval("0") == DEFAULT_INTERVAL
+    assert _parse_interval("-3") == DEFAULT_INTERVAL
+    assert _parse_interval("2.5") == 2.5

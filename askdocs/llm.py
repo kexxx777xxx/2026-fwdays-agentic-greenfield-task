@@ -21,6 +21,14 @@ def strip_think(text: str) -> str:
     return _THINK_RE.sub("", text).strip()
 
 
+class LLMError(RuntimeError):
+    """The LLM endpoint failed or returned an unusable response.
+
+    A transport/HTTP/parsing failure is NOT an honest "not in corpus" refusal —
+    it is surfaced as an error so callers don't fabricate a refusal on an outage.
+    """
+
+
 class LLMProvider(ABC):
     """Interface: "generate an answer from context"."""
 
@@ -34,17 +42,25 @@ class OpenAICompatibleProvider(LLMProvider):
         self._model = model or os.environ.get("LLM_MODEL", DEFAULT_MODEL)
 
     def complete(self, system: str, user: str) -> str:
-        response = httpx.post(
-            f"{self._base_url}/chat/completions",
-            json={
-                "model": self._model,
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                "temperature": 0,
-            },
-            timeout=120,
-        )
-        response.raise_for_status()
-        return strip_think(response.json()["choices"][0]["message"]["content"])
+        try:
+            response = httpx.post(
+                f"{self._base_url}/chat/completions",
+                json={
+                    "model": self._model,
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": user},
+                    ],
+                    "temperature": 0,
+                },
+                timeout=120,
+            )
+            response.raise_for_status()
+        except httpx.HTTPError as e:
+            raise LLMError(f"LLM-запит не вдався ({self._base_url}, {self._model}): {e}") from e
+
+        try:
+            content = response.json()["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            raise LLMError(f"LLM повернув неочікувану відповідь: {e}") from e
+        return strip_think(content)

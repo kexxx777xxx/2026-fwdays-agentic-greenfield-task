@@ -8,6 +8,7 @@ import os
 import sys
 
 from askdocs.answer import Answer, answer_question
+from askdocs.llm import LLMError
 
 
 def render_answer(answer: Answer) -> str:
@@ -15,6 +16,17 @@ def render_answer(answer: Answer) -> str:
         return f"{answer.text}\n\nДжерела: —"
     lines = "\n".join(f"  - {source}" for source in answer.sources)
     return f"{answer.text}\n\nДжерела:\n{lines}"
+
+
+def answer_or_error(ask, question: str) -> str:
+    """Render an answer, or a friendly message if the LLM/backend fails —
+    so a single failed question never crashes the CLI or the REPL."""
+    try:
+        return render_answer(ask(question))
+    except LLMError as e:
+        return f"Не вдалося отримати відповідь від моделі: {e}"
+    except Exception as e:  # noqa: BLE001 — outermost boundary, no tracebacks to the user
+        return f"Помилка: {e}"
 
 
 def _build_pipeline():
@@ -49,14 +61,18 @@ def _interactive(ask) -> None:
             return
         if not question:
             return
-        print("\n" + render_answer(ask(question)))
+        print("\n" + answer_or_error(ask, question))
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    ask = _build_pipeline()
+    try:
+        ask = _build_pipeline()
+    except Exception as e:  # noqa: BLE001 — e.g. vector store unreachable at startup
+        print(f"Не вдалося ініціалізувати askdocs: {e}", file=sys.stderr)
+        return 1
     if argv:
-        print(render_answer(ask(" ".join(argv))))
+        print(answer_or_error(ask, " ".join(argv)))
     else:
         _interactive(ask)
     return 0
