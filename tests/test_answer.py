@@ -1,7 +1,7 @@
 """Unit tests for the answer pipeline with fake Retriever/LLMProvider."""
 
-from askdocs.answer import NO_ANSWER_MARKER, REFUSAL_TEXT, answer_question
-from askdocs.llm import LLMProvider
+from askdocs.answer import ERROR_TEXT, NO_ANSWER_MARKER, REFUSAL_TEXT, answer_question
+from askdocs.llm import LLMError, LLMProvider
 from askdocs.retriever import RetrievedChunk, Retriever
 
 
@@ -47,6 +47,21 @@ def test_context_prompt_contains_numbered_fragments_and_sources():
     assert "[1] джерело: a.md (Розділ 0)" in user
     assert "[2] джерело: b.md (Розділ 1)" in user
     assert "питання?" in user
+
+
+class FailingLLM(LLMProvider):
+    def complete(self, system, user):
+        raise LLMError("endpoint недоступний")
+
+
+def test_llm_failure_returns_controlled_error_not_refusal():
+    answer = answer_question("питання?", FakeRetriever(CHUNKS), FailingLLM())
+
+    assert answer.error is True
+    assert answer.found is False
+    assert answer.sources == []
+    assert ERROR_TEXT in answer.text
+    assert answer.text != REFUSAL_TEXT  # an outage is not an honest refusal
 
 
 def test_no_answer_marker_becomes_honest_refusal():

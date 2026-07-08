@@ -8,11 +8,12 @@ answer it emits NO_ANSWER, which becomes an honest refusal (found=False).
 import re
 from dataclasses import dataclass
 
-from askdocs.llm import LLMProvider
+from askdocs.llm import LLMError, LLMProvider
 from askdocs.retriever import Retriever
 
 NO_ANSWER_MARKER = "NO_ANSWER"
 REFUSAL_TEXT = "Цього в документації немає."
+ERROR_TEXT = "Не вдалося отримати відповідь від моделі."
 
 SYSTEM_PROMPT = (
     "Ти — асистент по документації проєкту. Відповідай українською.\n"
@@ -30,6 +31,10 @@ class Answer:
     text: str
     sources: list[str]
     found: bool
+    # error=True marks a controlled failure state (e.g. the LLM was
+    # unreachable). It is distinct from a refusal (found=False, error=False):
+    # an outage is NOT evidence the corpus lacks the answer (NFR-007).
+    error: bool = False
 
 
 def _build_context(chunks) -> str:
@@ -64,7 +69,12 @@ def answer_question(
         return Answer(text=REFUSAL_TEXT, sources=[], found=False)
 
     user_prompt = f"Фрагменти документації:\n\n{_build_context(chunks)}\n\nПитання: {question}"
-    reply = llm.complete(SYSTEM_PROMPT, user_prompt)
+    try:
+        reply = llm.complete(SYSTEM_PROMPT, user_prompt)
+    except LLMError as e:
+        # Controlled error state — deliberately NOT a refusal: a network/HTTP/
+        # JSON failure is not evidence the corpus lacks the answer (NFR-007).
+        return Answer(text=f"{ERROR_TEXT} ({e})", sources=[], found=False, error=True)
 
     if NO_ANSWER_MARKER in reply:
         return Answer(text=REFUSAL_TEXT, sources=[], found=False)

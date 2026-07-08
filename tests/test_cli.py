@@ -24,6 +24,14 @@ def test_refusal_shows_text_and_explicit_no_sources():
     assert "Джерела: —" in out
 
 
+def test_error_answer_renders_message_without_sources_line():
+    answer = Answer(text="Не вдалося отримати відповідь.", sources=[], found=False, error=True)
+    out = render_answer(answer)
+
+    assert "Не вдалося отримати відповідь." in out
+    assert "Джерела" not in out  # error state, not a "no sources" answer
+
+
 def test_answer_or_error_renders_normal_answer():
     def ask(_q):
         return Answer(text="Відповідь [1].", sources=["a.md"], found=True)

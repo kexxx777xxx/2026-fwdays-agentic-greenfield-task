@@ -12,6 +12,8 @@ from askdocs.llm import LLMError
 
 
 def render_answer(answer: Answer) -> str:
+    if answer.error:
+        return answer.text  # controlled error state — no sources line
     if not answer.sources:
         return f"{answer.text}\n\nДжерела: —"
     lines = "\n".join(f"  - {source}" for source in answer.sources)

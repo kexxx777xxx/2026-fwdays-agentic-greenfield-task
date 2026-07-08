@@ -79,8 +79,11 @@ def hallucination_report(retriever: Retriever, llm: LLMProvider, golden=None, k:
         if entry.in_corpus:
             continue
         answer = answer_question(entry.question, retriever, llm, k=k)
+        # A genuine refusal counts; an LLM error state does not (it is not a
+        # verified refusal, just a failure to produce one).
+        refused = (not answer.found) and (not answer.error)
         results.append(
-            QuestionResult(entry.question, not answer.found, f"очікували відмову, отримали: {answer.text[:80]}")
+            QuestionResult(entry.question, refused, f"очікували відмову, отримали: {answer.text[:80]}")
         )
     return Report("Anti-hallucination refusal-rate", results)
 
