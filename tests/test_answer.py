@@ -51,7 +51,7 @@ def test_context_prompt_contains_numbered_fragments_and_sources():
 
 class FailingLLM(LLMProvider):
     def complete(self, system, user):
-        raise LLMError("endpoint недоступний")
+        raise LLMError("connect error до http://secret-endpoint:1234 (model=internal)")
 
 
 def test_llm_failure_returns_controlled_error_not_refusal():
@@ -60,8 +60,29 @@ def test_llm_failure_returns_controlled_error_not_refusal():
     assert answer.error is True
     assert answer.found is False
     assert answer.sources == []
-    assert ERROR_TEXT in answer.text
+    assert answer.text == ERROR_TEXT  # stable user-facing text
     assert answer.text != REFUSAL_TEXT  # an outage is not an honest refusal
+
+
+def test_llm_error_details_do_not_leak_into_answer():
+    answer = answer_question("питання?", FakeRetriever(CHUNKS), FailingLLM())
+
+    assert "secret-endpoint" not in answer.text
+    assert "model=internal" not in answer.text
+
+
+def test_no_answer_marker_with_trailing_punctuation_is_refusal():
+    answer = answer_question("питання?", FakeRetriever(CHUNKS), ScriptedLLM("NO_ANSWER."))
+
+    assert not answer.found
+    assert answer.text == REFUSAL_TEXT
+
+
+def test_answer_that_merely_mentions_marker_is_not_a_refusal():
+    llm = ScriptedLLM("Про режим NO_ANSWER у документації сказано таке [1].")
+    answer = answer_question("питання?", FakeRetriever(CHUNKS), llm)
+
+    assert answer.found  # substring mention must not be misread as a refusal
 
 
 def test_no_answer_marker_becomes_honest_refusal():

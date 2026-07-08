@@ -6,6 +6,7 @@ answer it emits NO_ANSWER, which becomes an honest refusal (found=False).
 """
 
 import re
+import sys
 from dataclasses import dataclass
 
 from askdocs.llm import LLMError, LLMProvider
@@ -74,8 +75,14 @@ def answer_question(
     except LLMError as e:
         # Controlled error state — deliberately NOT a refusal: a network/HTTP/
         # JSON failure is not evidence the corpus lacks the answer (NFR-007).
-        return Answer(text=f"{ERROR_TEXT} ({e})", sources=[], found=False, error=True)
+        # Keep the user-facing text stable; log the internal detail (endpoint/
+        # model) separately so it doesn't leak into the answer.
+        print(f"askdocs: LLM error: {e}", file=sys.stderr, flush=True)
+        return Answer(text=ERROR_TEXT, sources=[], found=False, error=True)
 
-    if NO_ANSWER_MARKER in reply:
+    # The prompt asks the model to emit exactly NO_ANSWER; match it as the whole
+    # reply (allowing trailing punctuation/whitespace) so a longer answer that
+    # merely mentions the token isn't misread as a refusal.
+    if reply.strip().rstrip(".!…").strip() == NO_ANSWER_MARKER:
         return Answer(text=REFUSAL_TEXT, sources=[], found=False)
     return Answer(text=reply, sources=_cited_sources(reply, chunks), found=True)
