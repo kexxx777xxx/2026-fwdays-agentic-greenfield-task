@@ -17,12 +17,6 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-  # OpenSpec-артефакти (специфікації і зміни) — структуровані документи свого
-  # формату (старт з `##`, `### Requirement`, `#### Scenario`). Їх перевіряє
-  # `openspec validate`, а не markdownlint, чиї prose-правила (MD041/MD022) тут
-  # хибно спрацьовують. Наш власний lint-gate так само не чіпає openspec/**.
-  path_filters:
-    - "!openspec/**"
   path_instructions:
     - path: "**"
       instructions: >-

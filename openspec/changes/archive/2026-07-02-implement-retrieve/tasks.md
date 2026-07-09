@@ -1,3 +1,5 @@
+# implement-retrieve — tasks
+
 ## 1. Vector store search
 
 - [x] 1.1 Add `search(vector, limit) -> list[tuple[payload, score]]` to the `VectorStore` interface and implement it in `QdrantStore` (cosine similarity, payload included)

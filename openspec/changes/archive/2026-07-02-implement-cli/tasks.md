@@ -1,3 +1,5 @@
+# implement-cli — tasks
+
 ## 1. CLI implementation
 
 - [x] 1.1 Implement `askdocs/cli.py`: `render_answer(answer) -> str` pure formatter (answer text + `Джерела:` list, or `Джерела: —` on refusal)

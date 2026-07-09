@@ -1,3 +1,5 @@
+# implement-answer — proposal
+
 ## Why
 
 Retrieve returns relevant chunks, but the user still has no answer. This change adds the answer capability (PRD FR-020, FR-021): generate a response strictly from retrieved chunks with source citations, or honestly say the corpus doesn't contain the answer. This also introduces the last mandatory interface, `LLMProvider` (TC-002/TC-003).
@@ -13,6 +15,7 @@ Retrieve returns relevant chunks, but the user still has no answer. This change 
 ## Capabilities
 
 ### New Capabilities
+
 - `answer`: Generate an answer from retrieved chunks with source citations, or an honest "not in the corpus". Covers PRD FR-020, FR-021.
 
 ### Modified Capabilities

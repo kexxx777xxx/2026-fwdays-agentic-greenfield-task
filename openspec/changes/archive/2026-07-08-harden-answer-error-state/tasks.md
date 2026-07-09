@@ -1,3 +1,5 @@
+# harden-answer-error-state — tasks
+
 ## 1. Pipeline error state
 
 - [x] 1.1 `Answer` gains an `error: bool = False` flag; `answer_question` wraps `llm.complete()` and returns `Answer(found=False, error=True, ERROR_TEXT)` on `LLMError`

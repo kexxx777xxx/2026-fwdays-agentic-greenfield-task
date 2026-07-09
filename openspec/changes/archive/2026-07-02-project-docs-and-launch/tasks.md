@@ -1,3 +1,5 @@
+# project-docs-and-launch — tasks
+
 ## 1. Launch
 
 - [x] 1.1 Create `corpus/` at repo root with 2–3 sample ГущоЛіт `.md` docs so `docker compose up` demos immediately

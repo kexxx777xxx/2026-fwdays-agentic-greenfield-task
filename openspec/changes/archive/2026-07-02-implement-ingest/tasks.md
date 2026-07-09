@@ -1,3 +1,5 @@
+# implement-ingest — tasks
+
 ## 1. Docker environment
 
 - [x] 1.1 Create `requirements.txt` (sentence-transformers, qdrant-client, markdown-it-py, pytest) and `Dockerfile` for the `app` service that pre-downloads the `paraphrase-multilingual-MiniLM-L12-v2` model at build time

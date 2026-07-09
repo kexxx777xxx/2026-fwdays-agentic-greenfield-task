@@ -1,3 +1,5 @@
+# implement-retrieve — proposal
+
 ## Why
 
 Chunks of the ГущоЛіт corpus are now stored in qdrant (change `implement-ingest`), but nothing can search them. Retrieve is the bridge between ingest and answering: PRD FR-010 — a question in, relevant chunks out. Without it the answer capability (FR-020+) has no context to work with.
@@ -12,6 +14,7 @@ Chunks of the ГущоЛіт corpus are now stored in qdrant (change `implement-
 ## Capabilities
 
 ### New Capabilities
+
 - `retrieve`: Given a user question, return the most relevant chunks from the vector store with source metadata and scores. Covers PRD FR-010.
 
 ### Modified Capabilities

@@ -1,3 +1,5 @@
+# implement-sync — tasks
+
 ## 1. Sync implementation
 
 - [x] 1.1 Implement `askdocs/sync.py`: `SyncSummary(added, updated, deleted)` dataclass and `sync_once(source, embedder, store)` — diff per-file chunk content-hashes (disk via DocSource vs store via get_all), re-ingest changed/new files, delete-by-source for files gone from disk

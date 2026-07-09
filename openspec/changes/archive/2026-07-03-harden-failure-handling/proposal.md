@@ -1,3 +1,5 @@
+# harden-failure-handling — proposal
+
 ## Why
 
 A CodeRabbit review of the submission PR surfaced that the shipped capabilities crash on infrastructure failure: an LLM outage or a vector-store blip raised raw tracebacks, killed the CLI/REPL, and could stop the sync watcher entirely. These are **behavioral requirements** (graceful degradation, and preserving the honesty contract) that were never captured in the specs. This change retrofits them into the SDD process: the code fix was applied first as a review hot-fix, and this change backfills the requirements, design, and spec scenarios so the behavior is governed, not ad-hoc.
@@ -12,6 +14,7 @@ A CodeRabbit review of the submission PR surfaced that the shipped capabilities 
 ## Capabilities
 
 ### Modified Capabilities
+
 - `answer`: add a requirement that infra failures are errors, not refusals.
 - `cli`: add a requirement for graceful degradation on backend failure.
 - `sync`: add a requirement for watcher resilience to transient failures and bad config.

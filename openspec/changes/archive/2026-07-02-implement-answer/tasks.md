@@ -1,3 +1,5 @@
+# implement-answer — tasks
+
 ## 1. LLM provider
 
 - [x] 1.1 Implement `askdocs/llm.py`: `LLMProvider` interface (`complete(system, user) -> str`) and `OpenAICompatibleProvider` (httpx POST to `{LLM_BASE_URL}/chat/completions`, model from `LLM_MODEL`, `<think>` blocks stripped)

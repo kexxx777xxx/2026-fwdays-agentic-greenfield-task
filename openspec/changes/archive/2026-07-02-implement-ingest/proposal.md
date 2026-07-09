@@ -1,3 +1,5 @@
+# implement-ingest — proposal
+
 ## Why
 
 askdocs must answer questions strictly from a local `.md` corpus, but nothing exists yet to get documents into a searchable form. Ingest is the first capability: without it there is nothing for retrieval or answering to build on. This change implements PRD requirements FR-001–FR-004 (see `docs/prd.md`), under constraints TC-001–TC-006.
@@ -15,6 +17,7 @@ askdocs must answer questions strictly from a local `.md` corpus, but nothing ex
 ## Capabilities
 
 ### New Capabilities
+
 - `ingest`: Load documents from a `DocSource` (v1: local `.md` files), chunk them preserving structural blocks, embed them, and persist them to the vector store with source metadata, idempotently. Covers PRD FR-001–FR-004.
 
 ### Modified Capabilities

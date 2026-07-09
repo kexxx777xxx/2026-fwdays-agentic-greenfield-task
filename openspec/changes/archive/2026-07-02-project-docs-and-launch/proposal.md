@@ -1,3 +1,5 @@
+# project-docs-and-launch — proposal
+
 ## Why
 
 The system is complete — ingest, retrieve, answer, cli, eval, sync all shipped — but a newcomer (human or agent) has no map: no README explaining what askdocs is or how to run it, no agent guide, and no one-command launch. PRD FR-050, FR-051, FR-052 close that gap so the project is usable and contributable without reading the source.
@@ -11,6 +13,7 @@ The system is complete — ingest, retrieve, answer, cli, eval, sync all shipped
 ## Capabilities
 
 ### New Capabilities
+
 - `project-docs`: README + agent guide + one-command launch. Covers PRD FR-050, FR-051, FR-052.
 
 ### Modified Capabilities

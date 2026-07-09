@@ -1,3 +1,5 @@
+# implement-cli — proposal
+
 ## Why
 
 The full pipeline — ingest, retrieve, answer — is shipped, but there is no way for a person to use it. The CLI is the product's only interface in v1 (PRD FR-030): ask a question, get an answer plus the list of source files.
@@ -13,6 +15,7 @@ The full pipeline — ingest, retrieve, answer — is shipped, but there is no w
 ## Capabilities
 
 ### New Capabilities
+
 - `cli`: Terminal interface — question in, answer plus source list out. Covers PRD FR-030.
 
 ### Modified Capabilities

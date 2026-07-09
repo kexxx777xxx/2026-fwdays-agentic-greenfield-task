@@ -1,3 +1,5 @@
+# harden-answer-error-state — proposal
+
 ## Why
 
 A CodeRabbit comment on `askdocs/answer.py` asked for LLM-failure handling in the answer pipeline. Originally (design D2 of `harden-failure-handling`) `answer_question` propagated `LLMError` and let the CLI boundary handle it. On explicit product-owner instruction we changed the pipeline itself to catch the failure and return a **controlled error state** — but deliberately NOT a refusal, to keep the honesty contract (NFR-007) intact.
@@ -14,6 +16,7 @@ This modifies the shipped `answer` capability's failure behavior. The code + spe
 ## Capabilities
 
 ### Modified Capabilities
+
 - `answer`: the "infrastructure failures are errors, not refusals" requirement now specifies a controlled error state returned by the pipeline (distinct from a refusal), rather than propagation.
 
 ## Impact

@@ -1,3 +1,5 @@
+# implement-sync — proposal
+
 ## Why
 
 Ingest is a one-shot: you run it, and the index is a snapshot. But documentation changes — files get edited, added, deleted. PRD FR-060 wants the mounted corpus directory kept continuously in sync with the vector store, so answers always reflect the current docs without a manual re-ingest. This also fixes a real gap: current ingest never removes chunks of files that were deleted from disk.
@@ -15,6 +17,7 @@ Ingest is a one-shot: you run it, and the index is a snapshot. But documentation
 ## Capabilities
 
 ### New Capabilities
+
 - `sync`: Continuously reconcile a mounted `.md` directory with the vector store — added, changed, and deleted files are reflected automatically. Covers PRD FR-060.
 
 ### Modified Capabilities

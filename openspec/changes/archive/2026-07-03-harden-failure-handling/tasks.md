@@ -1,3 +1,5 @@
+# harden-failure-handling — tasks
+
 ## 1. Provider error handling
 
 - [x] 1.1 `askdocs/llm.py`: add typed `LLMError`; wrap `httpx`/JSON in `complete()` so transport and response-shape failures raise `LLMError` with endpoint/model context
