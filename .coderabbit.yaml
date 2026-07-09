@@ -17,12 +17,12 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-  # Заморожені OpenSpec-зміни в архіві — це історичні записи процесу, а не код
-  # під рев'ю: їхній формат стартує з `##` (конфлікт із MD041/MD022) і вони
-  # незмінні за визначенням. Живі специфікації (openspec/specs/**) лишаються
-  # під рев'ю; їх перевіряє ще й `openspec validate`.
+  # OpenSpec-артефакти (специфікації і зміни) — структуровані документи свого
+  # формату (старт з `##`, `### Requirement`, `#### Scenario`). Їх перевіряє
+  # `openspec validate`, а не markdownlint, чиї prose-правила (MD041/MD022) тут
+  # хибно спрацьовують. Наш власний lint-gate так само не чіпає openspec/**.
   path_filters:
-    - "!openspec/changes/archive/**"
+    - "!openspec/**"
   path_instructions:
     - path: "**"
       instructions: >-
